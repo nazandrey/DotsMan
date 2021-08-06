@@ -17,17 +17,10 @@ namespace DotsMan
             
             var settings = GameObjectConversionSettings.FromWorld(world, blobStore);
             var movingObjectEntityPrefab = GameObjectConversionUtility.ConvertGameObjectHierarchy(movingObjectPrefab, settings);
-            var movingObjectByDirection = entityManager.Instantiate(movingObjectEntityPrefab);
-            entityManager.AddComponentData(movingObjectByDirection, new MoveByDirectionComponent
-            {
-                direction = math.forward(quaternion.identity),
-                speed = 1
-            });
-            
             var movingObjectByInput = entityManager.Instantiate(movingObjectEntityPrefab);
             entityManager.AddComponentData(movingObjectByInput, new MoveByInputComponent
             {
-                speed = 1
+                speed = 10
             });
         }
     }
