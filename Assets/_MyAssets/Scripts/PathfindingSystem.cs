@@ -23,31 +23,41 @@ namespace DotsMan
             (float3) Vector3.right,
         };
 
+        private EntityCommandBufferSystem ecbSystem;
+    
+        protected override void OnCreate()
+        {
+            base.OnCreate();
+            ecbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+        }
+
         protected override void OnUpdate()
         {
             _random.NextInt();
             var random = _random;
+            
+            var ecb = ecbSystem.CreateCommandBuffer().ToConcurrent();
+
+            var physicsWorldSystem = World.GetExistingSystem<BuildPhysicsWorld>();
+            var collisionWorld = physicsWorldSystem.PhysicsWorld.CollisionWorld;
+            var raycaster = new Raycaster(collisionWorld);
+            
             var directionsNative = new NativeArray<float3>(Directions, Allocator.TempJob);
 
             Entities
-                .WithStructuralChanges()
-                .WithoutBurst()
                 .WithAll<PhysicsCollider>()
                 .WithNone<PhysicalMoveComponent>()
-                .ForEach((Entity entity, ref PathfindingComponent pathfindingComponent, in Translation translation) =>
+                .ForEach((Entity entity, int entityInQueryIndex, ref PathfindingComponent pathfindingComponent, in Translation translation) =>
                 {
-                    var possibleDirections = new NativeList<float3>(Allocator.TempJob);
+                    var possibleDirections = new NativeList<float3>(Allocator.Temp);
                     foreach (var direction in directionsNative)
                     {
                         //not going back
                         if (direction.Equals(-pathfindingComponent.lastDirection))
                             continue;
-                        var foundEntity = Raycast(translation.Value, translation.Value + direction);
-                        var notWall = foundEntity == Entity.Null;
-                        if (notWall)
-                        {
+                        var hitWall = raycaster.WallCheck(translation.Value, translation.Value + direction);
+                        if (!hitWall)
                             possibleDirections.Add(direction);
-                        }
                     }
 
                     if (possibleDirections.Length > 0)
@@ -56,7 +66,7 @@ namespace DotsMan
                         var resultDirection = possibleDirections[resultDirectionIndex];
 
                         var translationXZ = new float3(translation.Value.x, 0, translation.Value.z);
-                        EntityManager.AddComponentData(entity, new PhysicalMoveComponent
+                        ecb.AddComponent(entityInQueryIndex, entity, new PhysicalMoveComponent
                         {
                             speed = 3,
                             fromPoint = translationXZ,
@@ -67,36 +77,10 @@ namespace DotsMan
 
                     possibleDirections.Dispose();
                 })
-                .Run();
+                .ScheduleParallel();
 
+            CompleteDependency();
             directionsNative.Dispose();
-        }
-
-        // https://docs.unity3d.com/Packages/com.unity.physics@0.6/manual/collision_queries.html
-        private Entity Raycast(float3 rayFrom, float3 rayTo)
-        {
-            var physicsWorldSystem = World.GetExistingSystem<BuildPhysicsWorld>();
-            var collisionWorld = physicsWorldSystem.PhysicsWorld.CollisionWorld;
-            var input = new RaycastInput()
-            {
-                Start = rayFrom,
-                End = rayTo,
-                Filter = new CollisionFilter()
-                {
-                    BelongsTo = (uint) PhysicsLayer.Enemy,
-                    CollidesWith = (uint) PhysicsLayer.Wall, 
-                    GroupIndex = 0
-                }
-            };
-
-            if (collisionWorld.CastRay(input, out var hit))
-            {
-                // see hit.Position
-                // see hit.SurfaceNormal
-                var entity = physicsWorldSystem.PhysicsWorld.Bodies[hit.RigidBodyIndex].Entity;
-                return entity;
-            }
-            return Entity.Null;
         }
     }
 }
