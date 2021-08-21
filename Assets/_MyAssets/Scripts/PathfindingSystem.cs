@@ -1,7 +1,5 @@
 ﻿using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
-using Unity.Jobs.LowLevel.Unsafe;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.Systems;
@@ -15,10 +13,7 @@ namespace DotsMan
     [UpdateInGroup(typeof(LateSimulationSystemGroup))]
     public class PathfindingSystem : SystemBase
     {
-        private NativeArray<Random> _randoms;
-
-        [NativeSetThreadIndex]
-        private int _threadId;
+        private Random _random = new Random(1234);
         
         private static readonly float3[] Directions = new[]
         {
@@ -30,6 +25,8 @@ namespace DotsMan
 
         protected override void OnUpdate()
         {
+            _random.NextInt();
+            var random = _random;
             var directionsNative = new NativeArray<float3>(Directions, Allocator.TempJob);
 
             Entities
@@ -55,9 +52,7 @@ namespace DotsMan
 
                     if (possibleDirections.Length > 0)
                     {
-                        var random = _randoms[_threadId];
-                        var resultDirectionIndex = random.NextInt(0, possibleDirections.Length);
-                        _randoms[_threadId] = random; //This is necessary to update the state of the element inside the array
+                        var resultDirectionIndex = random.NextInt(possibleDirections.Length);
                         var resultDirection = possibleDirections[resultDirectionIndex];
 
                         var translationXZ = new float3(translation.Value.x, 0, translation.Value.z);
@@ -75,12 +70,6 @@ namespace DotsMan
                 .Run();
 
             directionsNative.Dispose();
-        }
-
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
-            _randoms.Dispose();
         }
 
         // https://docs.unity3d.com/Packages/com.unity.physics@0.6/manual/collision_queries.html
