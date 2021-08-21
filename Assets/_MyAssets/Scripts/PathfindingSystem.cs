@@ -1,4 +1,5 @@
-﻿using Unity.Collections;
+﻿using System;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
@@ -13,7 +14,7 @@ namespace DotsMan
     [UpdateInGroup(typeof(LateSimulationSystemGroup))]
     public class PathfindingSystem : SystemBase
     {
-        private Random _random = new Random(1234);
+        private Random _random = new Random((uint) UnityEngine.Random.Range(1, Int32.MaxValue));
         
         private static readonly float3[] Directions = new[]
         {
