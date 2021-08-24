@@ -21,6 +21,10 @@ namespace DotsMan
             {
                 speed = 10
             });
+            entityManager.AddComponentData(movingObjectByInput, new PlayerComponent
+            {
+                health = 10
+            });
         }
     }
 }
