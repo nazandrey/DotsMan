@@ -15,11 +15,13 @@ namespace DotsMan
         {
             var ecb = _ecbSystem.CreateCommandBuffer().ToConcurrent();
             
-            Entities.ForEach((Entity entity, int entityInQueryIndex, ref PlayerComponent playerComponent) =>
+            Dependency = Entities.ForEach((Entity entity, int entityInQueryIndex, ref PlayerComponent playerComponent) =>
             {
                 if (playerComponent.health <= 0.01f)
                     ecb.DestroyEntity(entityInQueryIndex, entity);
-            }).ScheduleParallel();
+            }).Schedule(Dependency);
+            
+            _ecbSystem.AddJobHandleForProducer(Dependency);   
         }
     }
 }
