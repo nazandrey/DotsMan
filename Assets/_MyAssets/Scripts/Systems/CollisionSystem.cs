@@ -3,9 +3,9 @@ using Unity.Entities;
 using Unity.Physics;
 using Unity.Physics.Systems;
 
-namespace DotsMan
+namespace DotsMan.Systems
 {
-    public class TriggerSystem : SystemBase
+    public class CollisionSystem : SystemBase
     {
         private BuildPhysicsWorld _buildPhysicsWorldSystem;
         private StepPhysicsWorld _stepPhysicsWorldSystem;
@@ -20,15 +20,15 @@ namespace DotsMan
         protected override void OnUpdate()
         {
             Entities
-                .ForEach((DynamicBuffer<TriggerBuffer> triggers) =>
+                .ForEach((DynamicBuffer<CollisionBuffer> collisions) =>
                 {
-                    triggers.Clear();
+                    collisions.Clear();
                 })
                 .Run();
             
             var jobHandle = new CollisionEventJob
                 {
-                    Triggers = GetBufferFromEntity<TriggerBuffer>()
+                    Collisions = GetBufferFromEntity<CollisionBuffer>()
                 }
                 .Schedule
                 (
@@ -40,19 +40,19 @@ namespace DotsMan
         }
 
         [BurstCompile]
-        private struct CollisionEventJob : ITriggerEventsJob
+        private struct CollisionEventJob : ICollisionEventsJob
         {
-            public BufferFromEntity<TriggerBuffer> Triggers;
+            public BufferFromEntity<CollisionBuffer> Collisions;
 
-            public void Execute(TriggerEvent triggerEvent)
+            public void Execute(CollisionEvent collisionEvent)
             {
-                var entityA = triggerEvent.Entities.EntityA;
-                var entityB = triggerEvent.Entities.EntityB;
+                var entityA = collisionEvent.Entities.EntityA;
+                var entityB = collisionEvent.Entities.EntityB;
                 
-                if (Triggers.Exists(entityA))
-                    Triggers[entityA].Add(new TriggerBuffer {entity = entityB});
-                else if (Triggers.Exists(entityB))
-                    Triggers[entityB].Add(new TriggerBuffer {entity = entityA});
+                if (Collisions.Exists(entityA))
+                    Collisions[entityA].Add(new CollisionBuffer {entity = entityB});
+                else if (Collisions.Exists(entityB))
+                    Collisions[entityB].Add(new CollisionBuffer {entity = entityA});
             }
         }
     }

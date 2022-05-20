@@ -1,6 +1,7 @@
-﻿using Unity.Entities;
+﻿using DotsMan.Components;
+using Unity.Entities;
 
-namespace DotsMan
+namespace DotsMan.Systems
 {
     public class PlayerDestroySystem : SystemBase
     {

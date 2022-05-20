@@ -1,8 +1,7 @@
-﻿using System;
-using Unity.Entities;
+﻿using Unity.Entities;
 using Unity.Mathematics;
 
-namespace DotsMan
+namespace DotsMan.Components
 {
     [GenerateAuthoringComponent]
     public struct PathfindingComponent : IComponentData

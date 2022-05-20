@@ -1,7 +1,7 @@
 ﻿using Unity.Entities;
 using Unity.Mathematics;
 
-namespace DotsMan
+namespace DotsMan.Components
 {
     public struct PhysicalMoveComponent : IComponentData
     {

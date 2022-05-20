@@ -1,9 +1,10 @@
-﻿using Unity.Entities;
+﻿using DotsMan.Components;
+using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Transforms;
 
-namespace DotsMan
+namespace DotsMan.Systems
 {
     public class PhysicalMoveSystem : SystemBase
     {

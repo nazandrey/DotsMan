@@ -1,4 +1,5 @@
 ﻿using System;
+using DotsMan.Components;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -8,7 +9,7 @@ using Unity.Transforms;
 using UnityEngine;
 using Random = Unity.Mathematics.Random;
 
-namespace DotsMan
+namespace DotsMan.Systems
 {
     //should work after wall conversion for proper initial pathfinding
     [UpdateInGroup(typeof(LateSimulationSystemGroup))]

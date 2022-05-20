@@ -2,7 +2,7 @@
 using Unity.Entities;
 using Unity.Mathematics;
 
-namespace DotsMan
+namespace DotsMan.Components
 {
     [Serializable]
     public struct MoveByDirectionComponent : IComponentData

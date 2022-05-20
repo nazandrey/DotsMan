@@ -3,9 +3,9 @@ using Unity.Entities;
 using Unity.Physics;
 using Unity.Physics.Systems;
 
-namespace DotsMan
+namespace DotsMan.Systems
 {
-    public class CollisionSystem : SystemBase
+    public class TriggerSystem : SystemBase
     {
         private BuildPhysicsWorld _buildPhysicsWorldSystem;
         private StepPhysicsWorld _stepPhysicsWorldSystem;
@@ -20,15 +20,15 @@ namespace DotsMan
         protected override void OnUpdate()
         {
             Entities
-                .ForEach((DynamicBuffer<CollisionBuffer> collisions) =>
+                .ForEach((DynamicBuffer<TriggerBuffer> triggers) =>
                 {
-                    collisions.Clear();
+                    triggers.Clear();
                 })
                 .Run();
             
             var jobHandle = new CollisionEventJob
                 {
-                    Collisions = GetBufferFromEntity<CollisionBuffer>()
+                    Triggers = GetBufferFromEntity<TriggerBuffer>()
                 }
                 .Schedule
                 (
@@ -40,19 +40,19 @@ namespace DotsMan
         }
 
         [BurstCompile]
-        private struct CollisionEventJob : ICollisionEventsJob
+        private struct CollisionEventJob : ITriggerEventsJob
         {
-            public BufferFromEntity<CollisionBuffer> Collisions;
+            public BufferFromEntity<TriggerBuffer> Triggers;
 
-            public void Execute(CollisionEvent collisionEvent)
+            public void Execute(TriggerEvent triggerEvent)
             {
-                var entityA = collisionEvent.Entities.EntityA;
-                var entityB = collisionEvent.Entities.EntityB;
+                var entityA = triggerEvent.Entities.EntityA;
+                var entityB = triggerEvent.Entities.EntityB;
                 
-                if (Collisions.Exists(entityA))
-                    Collisions[entityA].Add(new CollisionBuffer {entity = entityB});
-                else if (Collisions.Exists(entityB))
-                    Collisions[entityB].Add(new CollisionBuffer {entity = entityA});
+                if (Triggers.Exists(entityA))
+                    Triggers[entityA].Add(new TriggerBuffer {entity = entityB});
+                else if (Triggers.Exists(entityB))
+                    Triggers[entityB].Add(new TriggerBuffer {entity = entityA});
             }
         }
     }

@@ -1,7 +1,8 @@
-﻿using Unity.Entities;
+﻿using DotsMan.Components;
+using Unity.Entities;
 using Unity.Transforms;
 
-namespace DotsMan
+namespace DotsMan.Systems
 {
     public class MoveByDirectionSystem : SystemBase
     {

@@ -1,6 +1,6 @@
 ﻿using Unity.Entities;
 
-namespace DotsMan
+namespace DotsMan.Components
 {
     [GenerateAuthoringComponent]
     public struct EnemyComponent : IComponentData
